@@ -1,6 +1,23 @@
 import EventCard from "../components/EventCard";
+import { useEffect, useState } from "react";
+import { getActivities } from "../api/activities";
 
 function Home() {
+  const [activities, setActivities] = useState([]);
+
+  useEffect(() => {
+    async function load() {
+      try {
+        const data = await getActivities();
+        setActivities(data);
+      } catch (e) {
+        console.error(e);
+      }
+    }
+
+    load();
+  }, []);
+
   return (
     <div style={{ padding: 20, fontFamily: "sans-serif" }}>
       
@@ -55,9 +72,16 @@ function Home() {
 
       {/* 🔥 СПИСОК */}
       <div>
-        <EventCard />
-        <EventCard />
-        <EventCard />
+        {activities.map(a => (
+          <div key={a.id} style={{
+            padding: 10,
+            border: "1px solid #ccc",
+            marginBottom: 10,
+            borderRadius: 10
+          }}>
+            {a.title}
+          </div>
+        ))}
       </div>
 
       {/* 🔥 FAB */}
