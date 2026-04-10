@@ -20,7 +20,27 @@ function Home() {
 
   return (
     <div style={{ padding: 20, fontFamily: "sans-serif" }}>
-      
+      {/* 🔥 TOP BAR */}
+<div style={{
+  display: "flex",
+  justifyContent: "flex-end",
+  marginBottom: 10
+}}>
+  <button
+    onClick={() => window.location.href = "/profile"}
+    style={{
+      background: "#9333c0",
+      border: "1px solid #ddd",
+      padding: "8px 12px",
+      borderRadius: 20,
+      cursor: "pointer",
+      fontWeight: "bold",
+      boxShadow: "0 2px 8px rgba(0,0,0,0.1)"
+    }}
+  >
+    👤 Профиль
+  </button>
+</div>
       {/* 🔥 HERO */}
       <div style={{
         background: "linear-gradient(135deg, #667eea, #764ba2)",
