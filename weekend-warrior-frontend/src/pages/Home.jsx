@@ -1,8 +1,10 @@
 import EventCard from "../components/EventCard";
 import { useEffect, useState } from "react";
 import { getActivities } from "../api/activities";
+import { useNavigate } from "react-router-dom";
 
 function Home() {
+  const navigate = useNavigate();
   const [activities, setActivities] = useState([]);
 
   useEffect(() => {
@@ -24,7 +26,7 @@ function Home() {
 <div style={{
   display: "flex",
   justifyContent: "flex-end",
-  marginBottom: 10
+  marginBottom: 10,
 }}>
   <button
     onClick={() => window.location.href = "/profile"}
@@ -37,8 +39,26 @@ function Home() {
       fontWeight: "bold",
       boxShadow: "0 2px 8px rgba(0,0,0,0.1)"
     }}
+    
   >
     👤 Профиль
+  </button>
+
+  {/* 🗺️ КАРТА */}
+  <button
+    onClick={() => navigate("/map")}
+    style={{
+      background: "#9333c0",
+      color: "white",
+      border: "1px solid #ddd",
+      padding: "8px 14px",
+      borderRadius: 20,
+      cursor: "pointer",
+      fontWeight: "bold",
+      boxShadow: "0 2px 8px rgba(0,0,0,0.15)"
+    }}
+  >
+    🗺️ Карта
   </button>
 </div>
       {/* 🔥 HERO */}
