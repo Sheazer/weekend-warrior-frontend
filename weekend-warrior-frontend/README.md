@@ -1,16 +1,7 @@
-# React + Vite
+# Фронт для Weekend warrior
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+Никаких библиотек, модулей скачивать не нужно, просто запустить проект по команде npm run dev, по умолчанию адрес http://localhost:5173/
 
-Currently, two official plugins are available:
+Если не закрыли прошлые порты, то следующий порт = текущий порт + 1
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
-
-## React Compiler
-
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
-
-## Expanding the ESLint configuration
-
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+Закрывать их нужно в диспетчере задач, но лучше сразу нажать ctrl + c в терминале чтобы закрыть
