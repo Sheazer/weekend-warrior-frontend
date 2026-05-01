@@ -1,4 +1,6 @@
-function EventCard() {
+import React from 'react';
+
+function EventCard({ activity }) {
   return (
     <div style={{
       borderRadius: 15,
@@ -8,14 +10,20 @@ function EventCard() {
       background: "white"
     }}>
       <img 
-        src="https://via.placeholder.com/400x200"
+        src={activity.image}
         style={{ width: "100%", height: 150, objectFit: "cover" }}
       />
 
       <div style={{ padding: 10 }}>
-        <h3>Футбол во дворе ⚽</h3>
-        <p style={{ color: "gray" }}>12 апреля, 18:00</p>
-        <p style={{ color: "#667eea" }}>2 км от тебя</p>
+        <h3>{activity.title}</h3>
+        <p style={{ color: "gray" }}>{activity.date}</p>
+        <p style={{ color: "#667eea" }}>{activity.price}</p>
+        <p>{activity.description}</p>
+        <p>{activity.category}</p>
+        <p>{activity.status}</p>
+        <p>{activity.maxPeople}</p>
+        <p>{activity.organizerID}</p>
+        <p>{activity.needModeration ? "Да" : "Нет"}</p>
       </div>
     </div>
   );

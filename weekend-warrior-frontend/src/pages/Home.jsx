@@ -8,17 +8,18 @@ function Home() {
   const [activities, setActivities] = useState([]);
 
   useEffect(() => {
-    async function load() {
-      try {
-        const data = await getActivities();
-        setActivities(data);
-      } catch (e) {
-        console.error(e);
-      }
+  async function load() {
+    try {
+      const data = await getActivities();
+      console.log("DATA:", data); // 👈 ВАЖНО
+      setActivities(data);
+    } catch (error) {
+      console.error(error);
     }
+  }
 
-    load();
-  }, []);
+  load();
+}, []);
 
   return (
     <div style={{ padding: 20, fontFamily: "sans-serif" }}>
@@ -113,17 +114,10 @@ function Home() {
 
       {/* 🔥 СПИСОК */}
       <div>
-        {activities.map(a => (
-          <div key={a.id} style={{
-            padding: 10,
-            border: "1px solid #ccc",
-            marginBottom: 10,
-            borderRadius: 10
-          }}>
-            {a.title}
-          </div>
-        ))}
-      </div>
+  {activities.map(a => (
+    <EventCard key={a.id} activity={a} />
+  ))}
+</div>
 
       {/* 🔥 FAB */}
       <button style={{
