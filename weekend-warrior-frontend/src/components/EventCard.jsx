@@ -1,4 +1,6 @@
 import React from "react";
+import { Link } from "react-router-dom";
+
 
 function EventCard({ activity }) {
   return (
@@ -165,7 +167,23 @@ function EventCard({ activity }) {
             boxShadow: "0 4px 14px rgba(102,126,234,0.35)"
           }}
         >
-          Открыть
+         <Link to={`/event/${activity.ID || activity.id}`}>
+          <button
+            style={{
+              border: "none",
+              background: "linear-gradient(135deg,#667eea,#9333c0)",
+              color: "white",
+              padding: "10px 18px",
+              borderRadius: 14,
+              cursor: "pointer",
+              fontWeight: "bold",
+              fontSize: 14,
+              boxShadow: "0 4px 14px rgba(102,126,234,0.35)"
+            }}
+          >
+            Открыть
+          </button>
+        </Link>
         </button>
       </div>
     </div>
