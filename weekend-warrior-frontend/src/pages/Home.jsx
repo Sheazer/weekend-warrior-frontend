@@ -24,43 +24,105 @@ function Home() {
   return (
     <div style={{ padding: 20, fontFamily: "sans-serif" }}>
       {/* 🔥 TOP BAR */}
+{/* 🔥 TOP BAR с проверкой сессии */}
 <div style={{
   display: "flex",
-  justifyContent: "flex-end",
-  marginBottom: 10,
+  justifyContent: "space-between", // Растянет элементы по краям
+  alignItems: "center",
+  marginBottom: 20,
+  background: "rgba(255,255,255,0.03)",
+  padding: "10px 20px",
+  borderRadius: 16,
+  border: "1px solid rgba(255,255,255,0.05)"
 }}>
-  <button
-    onClick={() => window.location.href = "/profile"}
-    style={{
-      background: "#9333c0",
-      border: "1px solid #ddd",
-      padding: "8px 12px",
-      borderRadius: 20,
-      cursor: "pointer",
-      fontWeight: "bold",
-      boxShadow: "0 2px 8px rgba(0,0,0,0.1)"
-    }}
-    
-  >
-    👤 Профиль
-  </button>
+  {/* Левая часть: Индикатор сессии */}
+  <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+    <div style={{
+      width: 10,
+      height: 10,
+      borderRadius: "50%",
+      background: localStorage.getItem("token") ? "#4ade80" : "#f87171", // Зеленый если в сети, красный если нет
+      boxShadow: localStorage.getItem("token") ? "0 0 10px #4ade80" : "0 0 10px #f87171"
+    }} />
+    <span style={{ fontSize: 14, color: "rgba(255,255,255,0.7)" }}>
+      {localStorage.getItem("token") 
+        ? `В сети (ID: ${localStorage.getItem("userId")})` 
+        : "Гость (Авторизуйтесь)"}
+    </span>
+  </div>
 
-  {/* 🗺️ КАРТА */}
-  <button
-    onClick={() => navigate("/map")}
-    style={{
-      background: "#9333c0",
-      color: "white",
-      border: "1px solid #ddd",
-      padding: "8px 14px",
-      borderRadius: 20,
-      cursor: "pointer",
-      fontWeight: "bold",
-      boxShadow: "0 2px 8px rgba(0,0,0,0.15)"
-    }}
-  >
-    🗺️ Карта
-  </button>
+  {/* Правая часть: Кнопки навигации и выхода */}
+  <div style={{ display: "flex", gap: 10 }}>
+    {localStorage.getItem("token") ? (
+      // Если авторизован — показываем Профиль и Выход
+      <>
+        <button
+          onClick={() => navigate("/profile")}
+          style={{
+            background: "rgba(255,255,255,0.08)",
+            border: "1px solid rgba(255,255,255,0.1)",
+            color: "white",
+            padding: "8px 16px",
+            borderRadius: 20,
+            cursor: "pointer",
+            fontWeight: "bold",
+          }}
+        >
+          👤 Профиль
+        </button>
+        <button
+          onClick={() => {
+            localStorage.removeItem("token");
+            localStorage.removeItem("userId");
+            window.location.reload(); // Перезагружаем страницу, чтобы сбросить стейт
+          }}
+          style={{
+            background: "rgba(239,68,68,0.2)",
+            border: "1px solid rgba(239,68,68,0.4)",
+            color: "#f87171",
+            padding: "8px 16px",
+            borderRadius: 20,
+            cursor: "pointer",
+            fontWeight: "bold",
+          }}
+        >
+          🚪 Выйти
+        </button>
+      </>
+    ) : (
+      // Если токена нет — кнопка Войти
+      <button
+        onClick={() => navigate("/login")}
+        style={{
+          background: "linear-gradient(135deg, #667eea, #9333c0)",
+          color: "white",
+          border: "none",
+          padding: "8px 16px",
+          borderRadius: 20,
+          cursor: "pointer",
+          fontWeight: "bold",
+        }}
+      >
+        🔑 Войти
+      </button>
+    )}
+
+    <button
+      onClick={() => navigate("/map")}
+      style={{
+        background: "#9333c0",
+        color: "white",
+        border: "none",
+        padding: "8px 16px",
+        borderRadius: 20,
+        cursor: "pointer",
+        fontWeight: "bold",
+        boxShadow: "0 2px 8px rgba(147,51,192,0.4)"
+      }}
+    >
+      🗺️ Карта
+    </button>
+  </div>
 </div>
       {/* 🔥 HERO */}
       <div style={{
