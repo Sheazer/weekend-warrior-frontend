@@ -2,7 +2,7 @@ import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 
 import Home from "./pages/Home";
 import EventDetails from "./pages/EventDetails";
-import CreateEvent from "./pages/CreateEvent";
+import CreateActivity from "./pages/CreateActivity";
 import Calendar from "./pages/Calendar";
 import Profile from "./pages/Profile";
 import ManageParticipants from "./pages/ManageParticipants";
@@ -19,7 +19,7 @@ function App() {
       <Routes>
         <Route path="/" element={<Home />} />
         <Route path="/event/:id" element={<EventDetails />} />
-        <Route path="/create" element={<CreateEvent />} />
+        <Route path="/create" element={<CreateActivity />} />
         <Route path="/calendar" element={<Calendar />} />
         <Route path="/profile" element={<Profile />} />
         <Route path="/manage" element={<ManageParticipants />} />
