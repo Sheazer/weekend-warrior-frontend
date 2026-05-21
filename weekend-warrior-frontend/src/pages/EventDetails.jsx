@@ -8,8 +8,11 @@ function EventDetails() {
   const [activity, setActivity] = useState(null);
   const [loading, setLoading] = useState(true);
   
-  // Состояние для кнопки действия ('join', 'joined', 'queue')
-  const [statusAction, setStatusAction] = useState("join"); 
+  // 🔥 Реальные стейты для интеграции с твоим Go-бэкендом
+  const [joinStatus, setJoinStatus] = useState(""); // "joined", "pending", "waitlist"
+  const [joinMessage, setJoinMessage] = useState(""); // Текст ответа от бэкенда
+  const [joinError, setJoinError] = useState("");
+  const [joinLoading, setJoinLoading] = useState(false);
   
   // Временный фейковый массив участников для рендеринга ленты аватаров
   const [participants, setParticipants] = useState([
@@ -34,28 +37,47 @@ function EventDetails() {
     load();
   }, [id]);
 
-  // Функция отправки запроса Join на твой Go бэкенд
+  // 🔥 ПОЛНОСТЬЮ ОБНОВЛЕННАЯ ФУНКЦИЯ ИНТЕГРАЦИИ С БЭКЕНДОМ
   const handleJoin = async () => {
-    if (statusAction === "joined") {
-      setStatusAction("join"); // Имитация "Покинуть"
+    setJoinError("");
+    setJoinMessage("");
+    setJoinLoading(true);
+
+    const token = localStorage.getItem("token");
+    if (!token) {
+      setJoinError("Вы должны быть авторизованы, чтобы присоединиться к активности!");
+      setJoinLoading(false);
       return;
     }
 
     try {
-      // Вызываем твою ручку: api.POST("/activities/:id/join", ...)
-      const response = await fetch(`${API_BASE_URL || "http://localhost:8080"}/activities/${id}/join`, {
+      // Стучимся на твою защищенную ручку protected.POST("/activities/:id/join", ...)
+      const response = await fetch(`http://localhost:8080/api/activities/${id}/join`, {
         method: "POST",
-        headers: { "Content-Type": "application/json" }
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${token}` // Передаем JWT-токен для AuthMiddleware
+        }
       });
-      
-      if (response.ok) {
-        setStatusAction("joined");
-        alert("Заявка успешно отправлена!");
+
+      const data = await response.json();
+
+      if (response.status === 200) {
+        // Успешно обработано транзакцией (статус: joined, pending или waitlist)
+        setJoinStatus(data.status);
+        setJoinMessage(data.message);
+      } else if (response.status === 409) {
+        // Сработал триггер UserAlreadyJoinedError на бэкенде
+        setJoinStatus(data.status);
+        setJoinError(`Вы уже подали заявку. Ваш текущий статус: ${data.status}`);
+      } else {
+        throw new Error(data.error || "Не удалось присоединиться к активности");
       }
     } catch (error) {
       console.error("Ошибка при вступлении:", error);
-      // Если бэк локально не запущен, всё равно переключим для демонстрации на защите
-      setStatusAction("joined"); 
+      setJoinError(error.message);
+    } finally {
+      setJoinLoading(false);
     }
   };
 
@@ -189,30 +211,51 @@ function EventDetails() {
           </div>
         </div>
 
+        {/* ВЫВОД СООБЩЕНИЙ ОБ УСПЕХЕ ИЛИ ОШИБКАХ ОТ БЭКЕНДА */}
+        {joinMessage && (
+          <div style={{ color: "#4ade80", background: "rgba(74,222,128,0.1)", border: "1px solid rgba(74,222,128,0.2)", padding: "12px 16px", borderRadius: 14, marginBottom: 20, fontSize: 14 }}>
+            🎉 {joinMessage}
+          </div>
+        )}
+
+        {joinError && (
+          <div style={{ color: "#f87171", background: "rgba(248,113,113,0.1)", border: "1px solid rgba(248,113,113,0.2)", padding: "12px 16px", borderRadius: 14, marginBottom: 20, fontSize: 14 }}>
+            ⚠️ {joinError}
+          </div>
+        )}
+
         {/* КНОПКИ ДЕЙСТВИЯ */}
         <div style={{ display: "flex", gap: 12, borderTop: "1px solid rgba(255,255,255,0.08)", paddingTop: 20 }}>
           
           <button
             onClick={handleJoin}
+            disabled={joinLoading || joinStatus === "joined" || joinStatus === "pending"}
             style={{
               flex: 1,
               border: "none",
-              background: statusAction === "joined" 
-                ? "rgba(239, 68, 68, 0.2)" 
-                : isFull ? "linear-gradient(135deg, #f59e0b, #d97706)" : "linear-gradient(135deg,#667eea,#9333c0)",
-              color: statusAction === "joined" ? "#f87171" : "white",
-              border: statusAction === "joined" ? "1px solid rgba(239,68,68,0.4)" : "none",
+              background: joinStatus === "joined"
+                ? "rgba(16, 185, 129, 0.2)" // Полупрозрачный зеленый, если уже внутри
+                : joinStatus === "pending"
+                ? "rgba(245, 158, 11, 0.2)" // Полупрозрачный оранжевый на модерации
+                : joinStatus === "waitlist"
+                ? "linear-gradient(135deg, #f59e0b, #d97706)" // Оранжевый градиент для очереди
+                : "linear-gradient(135deg,#667eea,#9333c0)", // Стандартный фиолетовый
+              color: joinStatus === "joined" ? "#10b981" : joinStatus === "pending" ? "#f59e0b" : "white",
+              border: joinStatus === "joined" ? "1px solid rgba(16,185,129,0.4)" : joinStatus === "pending" ? "1px solid rgba(245,158,11,0.4)" : "none",
               padding: "14px",
               borderRadius: 16,
-              cursor: "pointer",
+              cursor: (joinLoading || joinStatus === "joined" || joinStatus === "pending") ? "not-allowed" : "pointer",
               fontWeight: "bold",
               fontSize: 16,
-              boxShadow: "0 4px 15px rgba(0,0,0,0.2)"
+              boxShadow: "0 4px 15px rgba(0,0,0,0.2)",
+              transition: "all 0.2s ease"
             }}
           >
-            {statusAction === "joined" 
-              ? "❌ Покинуть событие" 
-              : isFull ? "⏳ Встать в очередь" : "⚡ Присоединиться"}
+            {joinLoading && "Связь с сервером..."}
+            {!joinLoading && !joinStatus && (isFull ? "⏳ Встать в очередь" : "⚡ Присоединиться")}
+            {!joinLoading && joinStatus === "joined" && "✓ Вы участвуете"}
+            {!joinLoading && joinStatus === "pending" && "⏳ Заявка на рассмотрении"}
+            {!joinLoading && joinStatus === "waitlist" && "🎒 Вы в листе ожидания"}
           </button>
 
           <button
