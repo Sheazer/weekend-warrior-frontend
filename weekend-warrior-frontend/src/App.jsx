@@ -10,6 +10,8 @@ import Chat from "./pages/Chat";
 import Notifications from "./pages/Notifications";
 import Map from "./pages/Map";
 import Settings from "./pages/Settings";
+import Login from "./pages/Login"; 
+import Register from "./pages/Register";
 
 function App() {
   return (
@@ -25,6 +27,8 @@ function App() {
         <Route path="/notifications" element={<Notifications />} />
         <Route path="/map" element={<Map />} />
         <Route path="/settings" element={<Settings />} />
+        <Route path="/login" element={<Login />} />
+        <Route path="/register" element={<Register />} />
       </Routes>
     </Router>
   );
