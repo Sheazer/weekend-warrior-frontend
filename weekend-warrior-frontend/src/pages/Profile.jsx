@@ -1,117 +1,261 @@
-import { useState } from "react";
+import React, { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { getUserProfile, updateActivityStatus } from "../api/activities";
 
 function Profile() {
-  const [user] = useState({
-    name: "Баха",
-    bio: "Люблю спорт, технологии и новые знакомства",
-    rating: 4.7,
-    interests: ["Футбол", "IT", "Игры", "Путешествия"],
-    events: [
-      { id: 1, title: "Футбол с друзьями", status: "completed" },
-      { id: 2, title: "Настольные игры", status: "planned" }
-    ]
-  });
+  const navigate = useNavigate();
+  
+  // Состояния для данных из бэкенда
+  const [profileData, setProfileData] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+
+  // Получаем ID текущего авторизованного юзера
+  const currentUserId = localStorage.getItem("userId");
+
+  useEffect(() => {
+    if (!currentUserId) {
+      navigate("/login");
+      return;
+    }
+    loadProfile();
+  }, [currentUserId, navigate]);
+
+  const loadProfile = async () => {
+    try {
+      setLoading(true);
+      const data = await getUserProfile(currentUserId);
+      setProfileData(data); // Записываем { user, organized_activities, joined_activities }
+    } catch (err) {
+      console.error(err);
+      setError("Ошибка при загрузке профиля. Возможно, сервер недоступен.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Изменение статуса активности (для созданных пользователем)
+  const handleStatusChange = async (activityId, currentStatus) => {
+    let nextStatus = "active";
+    if (currentStatus === "active") nextStatus = "finished";
+    else if (currentStatus === "finished") nextStatus = "cancelled";
+
+    try {
+      await updateActivityStatus(activityId, nextStatus);
+      
+      // Обновляем статус локально внутри organized_activities
+      setProfileData((prev) => ({
+        ...prev,
+        organized_activities: prev.organized_activities.map((act) =>
+          (act.ID || act.id) === activityId ? { ...act, status: nextStatus } : act
+        ),
+      }));
+    } catch (err) {
+      alert(`Ошибка при изменении статуса: ${err.message}`);
+    }
+  };
+
+  if (loading) {
+    return (
+      <div style={{ padding: 30, textAlign: "center", color: "#a78bfa", fontFamily: "sans-serif" }}>
+        🌀 Загрузка профиля пользователя...
+      </div>
+    );
+  }
+
+  if (error || !profileData) {
+    return (
+      <div style={{ padding: 30, textAlign: "center", color: "#f87171", fontFamily: "sans-serif" }}>
+        ❌ {error || "Данные не найдены"}
+      </div>
+    );
+  }
+
+  const { user, organized_activities = [], joined_activities = [] } = profileData;
 
   return (
     <div style={{
       padding: 20,
       fontFamily: "sans-serif",
-      background: "#05050500",
-      minHeight: "100vh"
+      background: "#121214",
+      minHeight: "100vh",
+      color: "white"
     }}>
       
-      {/* 🔥 HEADER */}
+      {/* 🔥 ДИНАМИЧЕСКИЙ HEADER (БОЛЬШЕ НИКАКИХ ЗАГЛУШЕК!) */}
       <div style={{
-        background: "linear-gradient(135deg, #667eea, #764ba2)",
+        background: "linear-gradient(135deg, #667eea, #9333c0)",
         color: "white",
         padding: 25,
-        borderRadius: 20,
+        borderRadius: 24,
         textAlign: "center",
-        boxShadow: "0 10px 30px rgba(0,0,0,0.2)"
+        boxShadow: "0 10px 30px rgba(0,0,0,0.3)"
       }}>
         <div style={{
           width: 90,
           height: 90,
           borderRadius: "50%",
-          background: "white",
-          margin: "0 auto 10px"
-        }} />
-
-        <h2>{user.name}</h2>
-        <p>{user.bio}</p>
-
-        <div style={{
-          marginTop: 10,
-          fontSize: 18
-        }}>
-          ⭐ {user.rating} / 5
-        </div>
-      </div>
-
-      {/* 🔥 INTERESTS */}
-      <div style={{ marginTop: 20 }}>
-        <h3>Интересы</h3>
-        <div style={{
+          background: "rgba(255,255,255,0.2)",
+          margin: "0 auto 10px",
           display: "flex",
-          flexWrap: "wrap",
-          gap: 10
+          alignItems: "center",
+          justifyContent: "center",
+          fontSize: 32
         }}>
-          {user.interests.map((i, index) => (
-            <div key={index} style={{
-              padding: "6px 12px",
-              background: "#667eea",
-              color: "white",
-              borderRadius: 20,
-              fontSize: 14
-            }}>
-              {i}
-            </div>
-          ))}
+          👤
+        </div>
+
+        {/* Сюда встает реальное имя из БД (например: user.name, user.username или user.email) */}
+        <h2 style={{ margin: "5px 0" }}>{user.name || user.username || "Пользователь"}</h2>
+        <p style={{ color: "rgba(255,255,255,0.7)", margin: "5px 0 10px" }}>
+          {user.bio || "О себе: информация не заполнена"}
+        </p>
+
+        <div style={{
+          background: "rgba(0,0,0,0.2)",
+          display: "inline-block",
+          padding: "6px 14px",
+          borderRadius: 20,
+          fontSize: 15
+        }}>
+          📧 {user.email}
         </div>
       </div>
 
-      {/* 🔥 EVENTS */}
+      {/* 🔥 ОРГАНИЗОВАННЫЕ СОБЫТИЯ (С УПРАВЛЕНИЕМ СТАТУСАМИ) */}
       <div style={{ marginTop: 30 }}>
-        <h3>Мои события</h3>
+        <h3 style={{ fontSize: 18, marginBottom: 12, color: "rgba(255,255,255,0.6)" }}>
+          Я организую ({organized_activities.length})
+        </h3>
 
-        {user.events.map(e => (
-          <div key={e.id} style={{
-            background: "white",
-            padding: 15,
-            marginBottom: 10,
-            borderRadius: 15,
-            boxShadow: "0 4px 10px rgba(0,0,0,0.05)",
-            display: "flex",
-            justifyContent: "space-between"
-          }}>
-            <span>{e.title}</span>
+        {organized_activities.length === 0 ? (
+          <div style={emptyBlockStyle}>Вы еще не создавали активностей.</div>
+        ) : (
+          <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+            {organized_activities.map((e) => (
+              <div key={e.ID || e.id} style={eventCardStyle}>
+                <div>
+                  <strong style={{ fontSize: 16, display: "block", marginBottom: 4 }}>{e.title}</strong>
+                  <span style={{ fontSize: 13, color: "rgba(255,255,255,0.4)" }}>
+                    📅 {e.date ? new Date(e.date).toLocaleDateString() : "Дата не указана"}
+                  </span>
+                </div>
 
-            <span style={{
-              color: e.status === "completed" ? "green" : "orange"
-            }}>
-              {e.status}
-            </span>
+                <button
+                  onClick={() => handleStatusChange(e.ID || e.id, e.status)}
+                  style={getStatusButtonStyle(e.status)}
+                >
+                  {e.status === "active" && "🟢 Активно"}
+                  {e.status === "finished" && "🔵 Завершено"}
+                  {e.status === "cancelled" && "🔴 Отменено"}
+                </button>
+              </div>
+            ))}
           </div>
-        ))}
+        )}
       </div>
 
-      {/* 🔥 EDIT BUTTON */}
+      {/* 🔥 СОБЫТИЯ, КУДА ПОЛЬЗОВАТЕЛЬ ЗАПИСАН */}
+      <div style={{ marginTop: 30 }}>
+        <h3 style={{ fontSize: 18, marginBottom: 12, color: "rgba(255,255,255,0.6)" }}>
+          Я участвую ({joined_activities.length})
+        </h3>
+
+        {joined_activities.length === 0 ? (
+          <div style={emptyBlockStyle}>Вы еще не записались ни на одну активность.</div>
+        ) : (
+          <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+            {joined_activities.map((e) => (
+              // Добавлена проверка на случай, если связь Activity прилетела пустой
+              e && (
+                <div key={e.ID || e.id} style={eventCardStyle}>
+                  <div>
+                    <strong style={{ fontSize: 16, display: "block", marginBottom: 4 }}>{e.title}</strong>
+                    <span style={{ fontSize: 13, color: "rgba(255,255,255,0.4)" }}>
+                      📂 Категория: {e.category || "Общее"}
+                    </span>
+                  </div>
+                  
+                  <span style={{
+                    fontSize: 13,
+                    fontWeight: "bold",
+                    color: e.status === "active" ? "#4ade80" : "#f87171"
+                  }}>
+                    {e.status === "active" ? "Идет сейчас" : "Завершено/Отменено"}
+                  </span>
+                </div>
+              )
+            ))}
+          </div>
+        )}
+      </div>
+
+      {/* КНОПКА РЕДАКТИРОВАНИЯ */}
       <button style={{
         marginTop: 30,
         width: "100%",
-        padding: 15,
-        borderRadius: 15,
+        padding: "14px",
+        borderRadius: 16,
         border: "none",
-        background: "#667eea",
+        background: "rgba(255,255,255,0.08)",
+        border: "1px solid rgba(255,255,255,0.1)",
         color: "white",
-        fontSize: 16,
+        fontSize: 15,
+        fontWeight: "bold",
         cursor: "pointer"
       }}>
-        Редактировать профиль
+        ⚙️ Редактировать профиль
       </button>
 
     </div>
   );
 }
+
+// Повторяющиеся стили для чистоты кода
+const eventCardStyle = {
+  background: "rgba(255,255,255,0.03)",
+  border: "1px solid rgba(255,255,255,0.08)",
+  padding: "16px 20px",
+  borderRadius: 16,
+  display: "flex",
+  justifyContent: "space-between",
+  alignItems: "center"
+};
+
+const emptyBlockStyle = {
+  background: "rgba(255,255,255,0.02)",
+  padding: 20,
+  borderRadius: 16,
+  textAlign: "center",
+  color: "rgba(255,255,255,0.4)",
+  border: "1px solid rgba(255,255,255,0.05)"
+};
+
+const getStatusButtonStyle = (status) => {
+  const isActive = status === "active";
+  const isFinished = status === "finished";
+  
+  return {
+    padding: "8px 14px",
+    borderRadius: 10,
+    border: "none",
+    fontWeight: "bold",
+    fontSize: 13,
+    cursor: "pointer",
+    background: isActive 
+      ? "rgba(74, 222, 128, 0.15)" 
+      : isFinished 
+      ? "rgba(96, 165, 250, 0.15)" 
+      : "rgba(248, 113, 113, 0.15)",
+    color: isActive ? "#4ade80" : isFinished ? "#60a5fa" : "#f87171",
+    border: `1px solid ${
+      isActive 
+        ? "rgba(74,222,128,0.3)" 
+        : isFinished 
+        ? "rgba(96,165,250,0.3)" 
+        : "rgba(248,113,113,0.3)"
+    }`
+  };
+};
 
 export default Profile;
