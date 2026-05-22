@@ -22,7 +22,8 @@ function ModeratorDashboard() {
   const loadActivities = async () => {
     try {
       setLoading(true);
-      const data = await getActivities();
+      const data = await getActivities("?status=active&include=participants");
+      console.log("Данные для модератора с бэка:", data);
       setActivities(data || []);
     } catch (error) {
       setMessage("Ошибка при загрузке активностей");
