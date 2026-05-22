@@ -138,3 +138,22 @@ export async function getUserProfile(userId) {
   }
   return res.json();
 }
+
+// Отправка отзыва об организаторе за завершенную активность
+export async function createActivityReview(activityId, rating, comment) {
+  const token = localStorage.getItem("token");
+  const res = await fetch(`${API_BASE_URL}/api/activities/${activityId}/review`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      "Authorization": `Bearer ${token}`
+    },
+    body: JSON.stringify({ rating: Number(rating), comment })
+  });
+
+  if (!res.ok) {
+    const errorData = await res.json();
+    throw new Error(errorData.error || "Не удалось отправить отзыв");
+  }
+  return res.json();
+}
