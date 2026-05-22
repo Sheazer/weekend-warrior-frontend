@@ -5,12 +5,10 @@ import { getUserProfile, updateActivityStatus } from "../api/activities";
 function Profile() {
   const navigate = useNavigate();
   
-  // Состояния для данных из бэкенда
   const [profileData, setProfileData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
-  // Получаем ID текущего авторизованного юзера
   const currentUserId = localStorage.getItem("userId");
 
   useEffect(() => {
@@ -25,7 +23,7 @@ function Profile() {
     try {
       setLoading(true);
       const data = await getUserProfile(currentUserId);
-      setProfileData(data); // Записываем { user, organized_activities, joined_activities }
+      setProfileData(data);
     } catch (err) {
       console.error(err);
       setError("Ошибка при загрузке профиля. Возможно, сервер недоступен.");
@@ -34,7 +32,6 @@ function Profile() {
     }
   };
 
-  // Изменение статуса активности (для созданных пользователем)
   const handleStatusChange = async (activityId, currentStatus) => {
     let nextStatus = "active";
     if (currentStatus === "active") nextStatus = "finished";
@@ -43,7 +40,6 @@ function Profile() {
     try {
       await updateActivityStatus(activityId, nextStatus);
       
-      // Обновляем статус локально внутри organized_activities
       setProfileData((prev) => ({
         ...prev,
         organized_activities: prev.organized_activities.map((act) =>
@@ -82,7 +78,43 @@ function Profile() {
       color: "white"
     }}>
       
-      {/* 🔥 ДИНАМИЧЕСКИЙ HEADER (БОЛЬШЕ НИКАКИХ ЗАГЛУШЕК!) */}
+      {/* 🔥 TOP BAR: ПАНЕЛЬ НАВИГАЦИИ СВЕРХУ */}
+      <div style={{
+        display: "flex",
+        justifyContent: "space-between",
+        alignItems: "center",
+        marginBottom: 20
+      }}>
+        {/* Кнопка Домой */}
+        <button
+          onClick={() => navigate("/")}
+          style={topButtonStyle}
+          onMouseEnter={(e) => e.target.style.background = "rgba(255, 255, 255, 0.1)"}
+          onMouseLeave={(e) => e.target.style.background = "rgba(255, 255, 255, 0.05)"}
+        >
+          Anasayfa 🏠
+        </button>
+
+        {/* Кнопка Редактировать сверху с иконкой */}
+        <button
+          onClick={() => navigate("/profile/edit")} // Роут формы редактирования
+          style={{
+            ...topButtonStyle,
+            color: "#60a5fa", // Выделим синеватым цветом настроек
+            borderColor: "rgba(96, 165, 250, 0.2)"
+          }}
+          onMouseEnter={(e) => {
+            e.target.style.background = "rgba(96, 165, 250, 0.1)";
+          }}
+          onMouseLeave={(e) => {
+            e.target.style.background = "rgba(255, 255, 255, 0.05)";
+          }}
+        >
+          ⚙️ Настройки
+        </button>
+      </div>
+      
+      {/* ДИНАМИЧЕСКИЙ HEADER */}
       <div style={{
         background: "linear-gradient(135deg, #667eea, #9333c0)",
         color: "white",
@@ -105,7 +137,6 @@ function Profile() {
           👤
         </div>
 
-        {/* Сюда встает реальное имя из БД (например: user.name, user.username или user.email) */}
         <h2 style={{ margin: "5px 0" }}>{user.name || user.username || "Пользователь"}</h2>
         <p style={{ color: "rgba(255,255,255,0.7)", margin: "5px 0 10px" }}>
           {user.bio || "О себе: информация не заполнена"}
@@ -122,7 +153,7 @@ function Profile() {
         </div>
       </div>
 
-      {/* 🔥 ОРГАНИЗОВАННЫЕ СОБЫТИЯ (С УПРАВЛЕНИЕМ СТАТУСАМИ) */}
+      {/* ОРГАНИЗОВАННЫЕ СОБЫТИЯ */}
       <div style={{ marginTop: 30 }}>
         <h3 style={{ fontSize: 18, marginBottom: 12, color: "rgba(255,255,255,0.6)" }}>
           Я организую ({organized_activities.length})
@@ -145,9 +176,10 @@ function Profile() {
                   onClick={() => handleStatusChange(e.ID || e.id, e.status)}
                   style={getStatusButtonStyle(e.status)}
                 >
-                  {e.status === "active" && "🟢 Активно"}
-                  {e.status === "finished" && "🔵 Завершено"}
-                  {e.status === "cancelled" && "🔴 Отменено"}
+                  {e.status === "active" && "🟢" }
+                  {e.status === "finished" && "🔵" }
+                  {e.status === "cancelled" && "🔴" }
+                  {" " + e.status}
                 </button>
               </div>
             ))}
@@ -155,7 +187,7 @@ function Profile() {
         )}
       </div>
 
-      {/* 🔥 СОБЫТИЯ, КУДА ПОЛЬЗОВАТЕЛЬ ЗАПИСАН */}
+      {/* СОБЫТИЯ, КУДА ПОЛЬЗОВАТЕЛЬ ЗАПИСАН */}
       <div style={{ marginTop: 30 }}>
         <h3 style={{ fontSize: 18, marginBottom: 12, color: "rgba(255,255,255,0.6)" }}>
           Я участвую ({joined_activities.length})
@@ -166,7 +198,6 @@ function Profile() {
         ) : (
           <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
             {joined_activities.map((e) => (
-              // Добавлена проверка на случай, если связь Activity прилетела пустой
               e && (
                 <div key={e.ID || e.id} style={eventCardStyle}>
                   <div>
@@ -190,28 +221,26 @@ function Profile() {
         )}
       </div>
 
-      {/* КНОПКА РЕДАКТИРОВАНИЯ */}
-      <button style={{
-        marginTop: 30,
-        width: "100%",
-        padding: "14px",
-        borderRadius: 16,
-        border: "none",
-        background: "rgba(255,255,255,0.08)",
-        border: "1px solid rgba(255,255,255,0.1)",
-        color: "white",
-        fontSize: 15,
-        fontWeight: "bold",
-        cursor: "pointer"
-      }}>
-        ⚙️ Редактировать профиль
-      </button>
-
     </div>
   );
 }
 
-// Повторяющиеся стили для чистоты кода
+// Стили для верхних кнопок
+const topButtonStyle = {
+  background: "rgba(255, 255, 255, 0.05)",
+  border: "1px solid rgba(255, 255, 255, 0.1)",
+  color: "#a78bfa",
+  padding: "10px 16px",
+  borderRadius: 14,
+  fontSize: 13,
+  fontWeight: "bold",
+  cursor: "pointer",
+  display: "flex",
+  alignItems: "center",
+  gap: 6,
+  transition: "all 0.2s ease"
+};
+
 const eventCardStyle = {
   background: "rgba(255,255,255,0.03)",
   border: "1px solid rgba(255,255,255,0.08)",
