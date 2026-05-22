@@ -1,6 +1,8 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { getUserProfile, updateActivityStatus } from "../api/activities";
+import ReviewModal from "../components/ReviewModal";
+
 
 function Profile() {
   const navigate = useNavigate();
@@ -8,10 +10,11 @@ function Profile() {
   const [profileData, setProfileData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const [selectedActivityForReview, setSelectedActivityForReview] = useState(null);
 
   const currentUserId = localStorage.getItem("userId");
 
-  useEffect(() => {
+  useEffect(() => { 
     if (!currentUserId) {
       navigate("/login");
       return;
@@ -188,38 +191,67 @@ function Profile() {
       </div>
 
       {/* СОБЫТИЯ, КУДА ПОЛЬЗОВАТЕЛЬ ЗАПИСАН */}
-      <div style={{ marginTop: 30 }}>
-        <h3 style={{ fontSize: 18, marginBottom: 12, color: "rgba(255,255,255,0.6)" }}>
-          Я участвую ({joined_activities.length})
-        </h3>
+    <div style={{ marginTop: 30 }}>
+      <h3 style={{ fontSize: 18, marginBottom: 12, color: "rgba(255,255,255,0.6)" }}>
+        Я участвую ({joined_activities.length})
+      </h3>
 
-        {joined_activities.length === 0 ? (
-          <div style={emptyBlockStyle}>Вы еще не записались ни на одну активность.</div>
-        ) : (
-          <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
-            {joined_activities.map((e) => (
-              e && (
-                <div key={e.ID || e.id} style={eventCardStyle}>
-                  <div>
-                    <strong style={{ fontSize: 16, display: "block", marginBottom: 4 }}>{e.title}</strong>
-                    <span style={{ fontSize: 13, color: "rgba(255,255,255,0.4)" }}>
-                      📂 Категория: {e.category || "Общее"}
-                    </span>
-                  </div>
-                  
+      {joined_activities.length === 0 ? (
+        <div style={emptyBlockStyle}>Вы еще не записались ни на одну активность.</div>
+      ) : (
+        <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+          {joined_activities.map((e) => (
+            e && (
+              <div key={e.ID || e.id} style={eventCardStyle}>
+                <div>
+                  <strong style={{ fontSize: 16, display: "block", marginBottom: 4 }}>{e.title}</strong>
+                  <span style={{ fontSize: 13, color: "rgba(255,255,255,0.4)" }}>
+                    📂 Категория: {e.category || "Общее"}
+                  </span>
+                </div>
+                
+                {/* Если активность завершена — даем возможность написать отзыв */}
+                {e.status === "finished" ? (
+                  <button
+                    onClick={() => setSelectedActivityForReview({ id: e.ID || e.id, title: e.title })}
+                    style={{
+                      padding: "6px 12px",
+                      borderRadius: 10,
+                      border: "1px solid rgba(245, 158, 11, 0.3)",
+                      background: "rgba(245, 158, 11, 0.1)",
+                      color: "#f59e0b",
+                      fontWeight: "bold",
+                      fontSize: 12,
+                      cursor: "pointer"
+                    }}
+                  >
+                    ★ Оценить
+                  </button>
+                ) : (
                   <span style={{
                     fontSize: 13,
                     fontWeight: "bold",
                     color: e.status === "active" ? "#4ade80" : "#f87171"
                   }}>
-                    {e.status === "active" ? "Идет сейчас" : "Завершено/Отменено"}
+                    {e.status === "active" ? "Идет сейчас" : "Отменено"}
                   </span>
-                </div>
-              )
-            ))}
-          </div>
-        )}
-      </div>
+                )}
+              </div>
+            )
+          ))}
+        </div>
+      )}
+    </div>
+
+    {/* 🔥 МОДАЛЬНОЕ ОКНО ОТЗЫВА (рендерится только при наличии выбранной активности) */}
+    {selectedActivityForReview && (
+      <ReviewModal
+        activityId={selectedActivityForReview.id}
+        activityTitle={selectedActivityForReview.title}
+        onClose={() => setSelectedActivityForReview(null)}
+        onReviewSuccess={loadProfile} // Перезагрузит профиль для актуализации данных
+      />
+    )}
 
     </div>
   );
