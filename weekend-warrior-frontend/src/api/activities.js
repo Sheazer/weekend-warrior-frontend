@@ -66,3 +66,33 @@ export async function createMessage(activityId, messageText) {
   if (!res.ok) throw new Error("Ошибка при отправке сообщения");
   return res.json();
 }
+
+// 6. ОДОБРЕНИЕ УЧАСТНИКА (Защищенный роут 🔒)
+export async function approveParticipant(activityId, userId) {
+  const res = await fetch(`${API_BASE_URL}/activities/${activityId}/participants/${userId}/approve`, {
+    method: "PUT",
+    headers: getAuthHeaders(),
+  });
+
+  if (!res.ok) {
+    if (res.status === 401) throw new Error("Для этого действия необходимо войти в аккаунт");
+    if (res.status === 403) throw new Error("У вас нет прав для одобрения участников");
+    throw new Error("Ошибка при одобрении участника");
+  }
+  return res.json();
+}
+
+// 7. ОТКЛОНЕНИЕ УЧАСТНИКА (Защищенный роут 🔒)
+export async function rejectParticipant(activityId, userId) {
+  const res = await fetch(`${API_BASE_URL}/activities/${activityId}/participants/${userId}/reject`, {
+    method: "DELETE",
+    headers: getAuthHeaders(),
+  });
+
+  if (!res.ok) {
+    if (res.status === 401) throw new Error("Для этого действия необходимо войти в аккаунт");
+    if (res.status === 403) throw new Error("У вас нет прав для отклонения участников");
+    throw new Error("Ошибка при отклонении участника");
+  }
+  return res.json();
+}
