@@ -70,6 +70,20 @@ function Home() {
                 👤 Профиль
               </button>
               <button
+                onClick={() => navigate("/moderator")}
+                style={{
+                  background: "rgba(147,51,192,0.2)",
+                  border: "1px solid rgba(147,51,192,0.4)",
+                  color: "#d4a5ff",
+                  padding: "8px 16px",
+                  borderRadius: 20,
+                  cursor: "pointer",
+                  fontWeight: "bold",
+                }}
+              >
+                📋 Модератор
+              </button>
+              <button
                 onClick={() => {
                   localStorage.removeItem("token");
                   localStorage.removeItem("userId");

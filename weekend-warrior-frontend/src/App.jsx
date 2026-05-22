@@ -6,6 +6,7 @@ import CreateActivity from "./pages/CreateActivity";
 import Calendar from "./pages/Calendar";
 import Profile from "./pages/Profile";
 import ManageParticipants from "./pages/ManageParticipants";
+import ModeratorDashboard from "./pages/ModeratorDashboard";
 import Chat from "./pages/Chat";
 import Notifications from "./pages/Notifications";
 import Map from "./pages/Map";
@@ -23,6 +24,7 @@ function App() {
         <Route path="/calendar" element={<Calendar />} />
         <Route path="/profile" element={<Profile />} />
         <Route path="/manage" element={<ManageParticipants />} />
+        <Route path="/moderator" element={<ModeratorDashboard />} />
         <Route path="/chat/:id" element={<Chat />} />
         <Route path="/notifications" element={<Notifications />} />
         <Route path="/map" element={<Map />} />
