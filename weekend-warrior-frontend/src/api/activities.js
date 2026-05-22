@@ -11,9 +11,16 @@ const getAuthHeaders = () => {
 };
 
 // 1. ПОЛУЧЕНИЕ ВСЕХ АКТИВНОСТЕЙ (Публичный роут, токен необязателен)
-export async function getActivities() {
-  const res = await fetch(`${API_BASE_URL}/activities`);
-  if (!res.ok) throw new Error("Не удалось загрузить список активностей");
+export async function getActivities(params = "") {
+  // Обрати внимание на обратные кавычки `` и переменную ${params} в конце URL!
+  const res = await fetch(`${API_BASE_URL}/activities${params}`, {
+    method: "GET",
+    headers: {
+      "Content-Type": "application/json"
+    },
+  });
+
+  if (!res.ok) throw new Error("Ошибка при получении активностей");
   return res.json();
 }
 
@@ -69,7 +76,7 @@ export async function createMessage(activityId, messageText) {
 
 // 6. ОДОБРЕНИЕ УЧАСТНИКА (Защищенный роут 🔒)
 export async function approveParticipant(activityId, userId) {
-  const res = await fetch(`${API_BASE_URL}/activities/${activityId}/participants/${userId}/approve`, {
+  const res = await fetch(`${API_BASE_URL}/api/activities/${activityId}/participants/${userId}/approve`, {
     method: "PUT",
     headers: getAuthHeaders(),
   });
@@ -84,7 +91,7 @@ export async function approveParticipant(activityId, userId) {
 
 // 7. ОТКЛОНЕНИЕ УЧАСТНИКА (Защищенный роут 🔒)
 export async function rejectParticipant(activityId, userId) {
-  const res = await fetch(`${API_BASE_URL}/activities/${activityId}/participants/${userId}/reject`, {
+  const res = await fetch(`${API_BASE_URL}/api/activities/${activityId}/participants/${userId}/reject`, {
     method: "DELETE",
     headers: getAuthHeaders(),
   });
