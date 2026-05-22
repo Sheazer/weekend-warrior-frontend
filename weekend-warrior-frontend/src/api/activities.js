@@ -107,7 +107,7 @@ export async function rejectParticipant(activityId, userId) {
 // Обновление статуса активности
 export async function updateActivityStatus(activityId, status) {
   const token = localStorage.getItem("token");
-  const res = await fetch(`${API_BASE_URL}/activities/${activityId}/status`, {
+  const res = await fetch(`${API_BASE_URL}/api/activities/${activityId}/status`, {
     method: "PATCH",
     headers: {
       "Content-Type": "application/json",
@@ -118,7 +118,7 @@ export async function updateActivityStatus(activityId, status) {
 
   if (!res.ok) {
     const errorData = await res.json();
-    throw new Error(errorData.error || "Не удалось обновить статус");
+    throw new Error(errorData.  error || "Не удалось обновить статус");
   }
   return res.json();
 }
