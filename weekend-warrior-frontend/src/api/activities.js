@@ -103,3 +103,38 @@ export async function rejectParticipant(activityId, userId) {
   }
   return res.json();
 }
+
+// Обновление статуса активности
+export async function updateActivityStatus(activityId, status) {
+  const token = localStorage.getItem("token");
+  const res = await fetch(`${API_BASE_URL}/activities/${activityId}/status`, {
+    method: "PATCH",
+    headers: {
+      "Content-Type": "application/json",
+      "Authorization": `Bearer ${token}`
+    },
+    body: JSON.stringify({ status })
+  });
+
+  if (!res.ok) {
+    const errorData = await res.json();
+    throw new Error(errorData.error || "Не удалось обновить статус");
+  }
+  return res.json();
+}
+
+
+// Получение полного профиля пользователя, включая его активности
+export async function getUserProfile(userId) {
+  const res = await fetch(`${API_BASE_URL}/user/${userId}`, {
+    method: "GET",
+    headers: {
+      "Content-Type": "application/json",
+    },
+  });
+
+  if (!res.ok) {
+    throw new Error("Не удалось загрузить данные профиля");
+  }
+  return res.json();
+}
