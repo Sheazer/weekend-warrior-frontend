@@ -1,6 +1,12 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { API_BASE_URL } from "../config";
+import {
+  MapContainer,
+  TileLayer,
+  Marker,
+  useMapEvents
+} from "react-leaflet";
 
 
 function CreateActivity() {
@@ -12,9 +18,12 @@ function CreateActivity() {
     description: "",
     category: "sports", // По умолчанию ставим "sports"
     date: "",           // В бэкенде это строка (string)
-    max_people: 10      // По умолчанию 10 участников
+    max_people: 10,      // По умолчанию 10 участников
+
+    latitude: null,
+    longitude: null
   });
-  
+  const [showMap, setShowMap] = useState(false);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
@@ -185,7 +194,87 @@ function CreateActivity() {
               style={{ width: "100%", padding: 12, borderRadius: 12, border: "1px solid rgba(255,255,255,0.1)", background: "rgba(255,255,255,0.06)", color: "white", fontSize: 15, boxSizing: "border-box" }}
             />
           </div>
+          {/* Кнопка местоположения*/}
+<div>
+  <label
+    style={{
+      display: "block",
+      marginBottom: 6,
+      fontSize: 14,
+      color: "rgba(255,255,255,0.7)",
+      fontWeight: "500"
+    }}
+  >
+    Локация на карте
+  </label>
 
+  <button
+    type="button"
+    onClick={() => setShowMap(!showMap)}
+    style={{
+      width: "100%",
+      padding: 12,
+      borderRadius: 12,
+      border: "1px solid rgba(255,255,255,0.1)",
+      background: "rgba(255,255,255,0.06)",
+      color: "white",
+      cursor: "pointer"
+    }}
+  >
+    {formData.latitude
+      ? "📍 Место выбрано"
+      : "🗺️ Выбрать место"}
+  </button>
+
+  {formData.latitude && (
+    <div
+      style={{
+        marginTop: 8,
+        fontSize: 13,
+        color: "rgba(255,255,255,0.6)"
+      }}
+    >
+      Lat: {formData.latitude.toFixed(5)}
+      <br />
+      Lng: {formData.longitude.toFixed(5)}
+    </div>
+  )}
+
+  {showMap && (
+    <div
+      style={{
+        marginTop: 12,
+        borderRadius: 16,
+        overflow: "hidden"
+      }}
+    >
+      <MapContainer
+        center={[42.8746, 74.5698]}
+        zoom={13}
+        style={{
+          height: "350px",
+          width: "100%"
+        }}
+      >
+        <TileLayer
+          attribution='&copy; OpenStreetMap'
+          url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+        />
+
+        <LocationPicker setFormData={setFormData} />
+
+        {formData.latitude && (
+          <Marker
+            position={[
+              formData.latitude,
+              formData.longitude
+            ]}
+          />
+        )}
+      </MapContainer>
+    </div>
+  )}
+</div>
           {/* Кнопка отправки */}
           <button
             type="submit"
@@ -226,6 +315,19 @@ function CreateActivity() {
       </div>
     </div>
   );
+}
+function LocationPicker({ setFormData }) {
+  useMapEvents({
+    click(e) {
+      setFormData(prev => ({
+        ...prev,
+        latitude: e.latlng.lat,
+        longitude: e.latlng.lng
+      }));
+    }
+  });
+
+  return null;
 }
 
 export default CreateActivity;
