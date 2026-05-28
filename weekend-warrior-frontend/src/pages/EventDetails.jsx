@@ -1,6 +1,8 @@
 import React, { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { getActivities } from "../api/activities";
+import { API_BASE_URL } from "../config";
+
 
 function EventDetails() {
   const { id } = useParams();
