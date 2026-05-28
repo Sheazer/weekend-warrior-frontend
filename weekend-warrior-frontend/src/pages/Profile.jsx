@@ -70,7 +70,9 @@ function Profile() {
     );
   }
 
-  const { user, organized_activities = [], joined_activities = [] } = profileData;
+ const { user } = profileData;
+ const organized_activities = profileData.organized_activities || [];
+ const joined_activities = profileData.joined_activities || [];
 
   return (
     <div style={{
