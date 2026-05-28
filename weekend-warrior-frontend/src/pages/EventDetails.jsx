@@ -52,7 +52,7 @@ function EventDetails() {
 
     try {
       // Стучимся на твою защищенную ручку protected.POST("/activities/:id/join", ...)
-      const response = await fetch(`http://localhost:8080/api/activities/${id}/join`, {
+      const response = await fetch(`${API_BASE_URL}/api/activities/${id}/join`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
