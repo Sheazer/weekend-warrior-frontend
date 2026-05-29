@@ -6,6 +6,7 @@ import { getActivities } from "../api/activities";
 function Home() {
   const navigate = useNavigate();
   const [activities, setActivities] = useState([]);
+  const [radius, setRadius] = useState(10);
   const token = localStorage.getItem("token");
   const userId = localStorage.getItem("userId");
 
@@ -26,6 +27,7 @@ function Home() {
     localStorage.removeItem("userId");
     window.location.reload();
   };
+
 
   return (
     <div style={styles.container}>
@@ -67,8 +69,18 @@ function Home() {
         </div>
         
         <div style={styles.radiusGroup}>
-          <span style={styles.radiusText}>Радиус: 10 км</span>
-          <input type="range" min="1" max="10" style={styles.rangeInput} />
+          <span style={styles.radiusText}>
+  Радиус: {radius} км
+</span>
+
+<input
+  type="range"
+  min="1"
+  max="10"
+  value={radius}
+  onChange={(e) => setRadius(e.target.value)}
+  style={styles.rangeInput}
+/>
         </div>
       </section>
 
