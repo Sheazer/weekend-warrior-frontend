@@ -7,6 +7,7 @@ function Home() {
   const navigate = useNavigate();
   const [activities, setActivities] = useState([]);
   const [radius, setRadius] = useState(10);
+  const [search, setSearch] = useState("");
   const token = localStorage.getItem("token");
   const userId = localStorage.getItem("userId");
 
@@ -28,6 +29,15 @@ function Home() {
     window.location.reload();
   };
 
+  const filteredActivities = activities.filter(activity => {
+    const query = search.toLowerCase();
+
+    return (
+      activity.title?.toLowerCase().includes(query) ||
+      activity.description?.toLowerCase().includes(query) ||
+      activity.category?.toLowerCase().includes(query)
+    );
+  });
 
   return (
     <div style={styles.container}>
@@ -57,7 +67,12 @@ function Home() {
       {/* 🚀 HERO SECTION & SEARCH */}
       <section style={styles.heroCard}>
         <h1 style={styles.heroTitle}>Найди событие рядом 🚀</h1>
-        <input placeholder="Поиск событий..." style={styles.searchInput} />
+        <input
+  placeholder="Поиск событий..."
+  value={search}
+  onChange={(e) => setSearch(e.target.value)}
+  style={styles.searchInput}
+/>
       </section>
 
       {/* 🎛️ FILTERS & RADIUS PANEL */}
@@ -86,10 +101,15 @@ function Home() {
 
       {/* 📋 ACTIVITIES LIST */}
       <main style={styles.listContainer}>
-        {activities.length === 0 ? (
+        {filteredActivities.length === 0 ? (
           <p style={styles.emptyText}>Активностей не найдено 🛌</p>
         ) : (
-          activities.map(a => <EventCard key={a.ID || a.id} activity={a} />)
+          filteredActivities.map(a => (
+  <EventCard
+    key={a.ID || a.id}
+    activity={a}
+  />
+))
         )}
       </main>
 
